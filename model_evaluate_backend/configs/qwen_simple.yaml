@@ -1,0 +1,30 @@
+# Qwen1.5-0.5B-Chat 简单评测配置 - 不使用量化
+
+# 全局配置
+output_dir: "./outputs"  # 结果输出目录
+debug: true             # 是否开启调试模式
+
+# 任务列表
+tasks:
+  # 使用Qwen模型评测Math数据集
+  - name: "qwen_math_simple"
+    model:
+      name: "huggingface"      # 模型类型
+      model_name: "/home/bugsmith/.cache/huggingface/hub/models--Qwen--Qwen1.5-0.5B-Chat/snapshots/4d14e384a4b037942bb3f3016665157c8bcb70ea"  # 本地模型路径
+      load_in_8bit: false      # 不使用8bit量化
+      load_in_4bit: false      # 不使用4bit量化
+      device: "cuda"           # 使用设备
+      trust_remote_code: true  # 允许执行模型代码
+    dataset:
+      name: "math"             # 数据集名称
+      max_samples: 1           # 只测试1个样本
+    metrics:
+      - "accuracy"             # 使用准确率指标
+    eval_config:
+      batch_size: 1
+      prompt_template: "请解答以下数学问题：\n\n{problem}\n\n请一步步思考，并给出答案。"
+      generation_kwargs:
+        temperature: 0.1
+        max_new_tokens: 256
+        do_sample: false       # 不使用采样，使用贪婪解码
+        repetition_penalty: 1.1 

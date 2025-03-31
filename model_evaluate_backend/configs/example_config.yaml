@@ -1,0 +1,49 @@
+# 评测任务配置示例
+
+# 全局配置
+output_dir: "./outputs"  # 结果输出目录
+debug: true             # 是否开启调试模式
+
+# 任务列表
+tasks:
+  # 任务1：使用OpenAI模型评测GSM8K数据集
+  - name: "openai_gsm8k_test"
+    model:
+      name: "openai"
+      model_name: "gpt-3.5-turbo"  # OpenAI模型名称
+    dataset:
+      name: "gsm8k"  # 数据集名称
+      max_samples: 10  # 最大样本数
+      split: "test"    # 使用测试集
+    metrics:
+      - "accuracy"     # 使用准确率指标
+      - "exact_match"  # 使用精确匹配指标
+    eval_config:
+      batch_size: 4
+      prompt_template: "请解决以下数学问题，一步步思考，并提供最终答案。\n\n问题: {question}\n\n请解答:"
+      generation_kwargs:
+        temperature: 0.2
+        top_p: 0.95
+        max_tokens: 1024
+        system_message: "你是一个擅长解决数学问题的助手。请一步步思考，最后使用'答案是: X'的格式给出答案。"
+
+  # 任务2：使用HuggingFace模型评测Math数据集
+  - name: "huggingface_math_test"
+    model:
+      name: "huggingface"
+      model_name: "meta-llama/Llama-2-7b-chat-hf"  # HuggingFace模型名称
+      load_in_8bit: true  # 使用8bit量化
+      device: "cuda"      # 使用GPU
+    dataset:
+      name: "math"       # 数据集名称
+      max_samples: 5     # 最大样本数
+      subject: "algebra" # 仅使用代数问题
+    metrics:
+      - "accuracy"       # 使用准确率指标
+    eval_config:
+      batch_size: 1
+      prompt_template: "<s>[INST] 请解决以下数学问题：\n\n{problem}\n\n请一步步思考并给出答案。 [/INST]"
+      generation_kwargs:
+        temperature: 0.1
+        top_p: 0.9
+        max_new_tokens: 512 

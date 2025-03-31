@@ -1,0 +1,28 @@
+# 简单评测任务配置示例 - 只使用OpenAI
+
+# 全局配置
+output_dir: "./outputs"  # 结果输出目录
+debug: true             # 是否开启调试模式
+
+# 任务列表
+tasks:
+  # 使用OpenAI模型评测GSM8K数据集
+  - name: "openai_gsm8k_test"
+    model:
+      name: "openai"      # 模型类型
+      model_name: "gpt-3.5-turbo"  # OpenAI模型名称
+      # api_key 将从环境变量 OPENAI_API_KEY 获取
+      retry_count: 2      # API调用失败时的重试次数
+    dataset:
+      name: "gsm8k"       # 数据集名称
+      max_samples: 3      # 最大样本数
+      split: "test"       # 使用测试集
+    metrics:
+      - "accuracy"        # 使用准确率指标
+    eval_config:
+      batch_size: 1
+      prompt_template: "问题: {question}\n\n请一步步思考，最后使用'答案是: X'的格式给出最终答案。"
+      generation_kwargs:
+        temperature: 0.2
+        max_tokens: 512
+        system_message: "你是一个擅长解决数学问题的助手。仔细分析问题，一步步思考，最后使用'答案是: X'的格式给出最终答案。" 

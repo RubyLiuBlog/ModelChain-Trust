@@ -1,0 +1,10 @@
+{"problem": "求解方程 x^2 - 7x + 12 = 0。", "answer": "3, 4", "type": "algebra"}
+{"problem": "计算三角形面积，底边长为6，高为4。", "answer": "12", "type": "geometry"}
+{"problem": "对于函数 f(x) = 2x^3 - 3x^2 + 1，求 f'(2)。", "answer": "12", "type": "precalculus"}
+{"problem": "在抛一枚标准硬币6次的实验中，至少投出3次正面朝上的概率是多少？", "answer": "0.656", "type": "probability"}
+{"problem": "一个圆的周长是12π，求它的面积。", "answer": "36π", "type": "geometry"}
+{"problem": "计算 log₂(32)。", "answer": "5", "type": "algebra"}
+{"problem": "化简 (3x² - 6x) ÷ 3。", "answer": "x² - 2x", "type": "algebra"}
+{"problem": "求数列 2, 6, 10, 14, ... 的第10项。", "answer": "38", "type": "algebra"}
+{"problem": "如果 sin(x) = 0.6，求 cos(x) 的值。", "answer": "0.8", "type": "trigonometry"}
+{"problem": "在直角三角形中，如果一个锐角为30°，另一个锐角是多少度？", "answer": "60°", "type": "geometry"}

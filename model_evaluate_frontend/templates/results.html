@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ theme.name }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>评测结果 - {{ theme.title }}</title>
+    <meta name="theme-color" content="#9370DB">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .json-key {
+            color: #E9B8FF;  /* 浅紫色 */
+        }
+        .json-string {
+            color: #8AE88A;  /* 浅绿色 */
+        }
+        .json-number {
+            color: #8AB4F8;  /* 浅蓝色 */
+        }
+        .json-boolean {
+            color: #F8C888;  /* 浅橙色 */
+        }
+        .json-null {
+            color: #AAAAAA;  /* 灰色 */
+        }
+        pre {
+            background-color: #252525;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 4px;
+            overflow: auto;
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <a href="{{ url_for('index') }}">{{ theme.title }}</a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">评测结果: {{ filename }}</h2>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">返回首页</a>
+            </div>
+            
+            <div>
+                {% if result.model_path %}
+                <h3>基本信息</h3>
+                <table class="table">
+                    <tr>
+                        <th>模型路径：</th>
+                        <td>{{ result.model_path }}</td>
+                    </tr>
+                    <tr>
+                        <th>评测数据集：</th>
+                        <td>{{ result.datasets|join(', ') }}</td>
+                    </tr>
+                    <tr>
+                        <th>时间戳：</th>
+                        <td>{{ result.timestamp }}</td>
+                    </tr>
+                    <tr>
+                        <th>总耗时：</th>
+                        <td>{{ result.total_elapsed_time }}</td>
+                    </tr>
+                </table>
+                {% endif %}
+                
+                {% if result.results %}
+                <h3>评测结果摘要</h3>
+                {% for dataset_name, dataset_result in result.results.items() %}
+                <div>
+                    <h4>{{ dataset_name }}</h4>
+                    {% if dataset_result.metrics %}
+                    <table class="table">
+                        <tr>
+                            <th>准确率：</th>
+                            <td>{{ dataset_result.metrics.accuracy.score|float|round(4) }}</td>
+                        </tr>
+                        <tr>
+                            <th>正确数/总数：</th>
+                            <td>{{ dataset_result.metrics.accuracy.correct }}/{{ dataset_result.metrics.accuracy.total }}</td>
+                        </tr>
+                        <tr>
+                            <th>耗时：</th>
+                            <td>{{ dataset_result.elapsed_time }}</td>
+                        </tr>
+                    </table>
+                    {% elif dataset_result.error %}
+                    <div class="alert alert-danger">
+                        <strong>错误：</strong> {{ dataset_result.error }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                {% endif %}
+                
+                <h3>完整结果数据</h3>
+                <pre id="json-display"></pre>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 格式化JSON数据
+        function syntaxHighlight(json) {
+            if (typeof json !== 'string') {
+                json = JSON.stringify(json, undefined, 2);
+            }
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                var cls = 'json-number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json-null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+        
+        // 显示JSON数据
+        document.addEventListener('DOMContentLoaded', function() {
+            var jsonData = {{ result|tojson }};
+            document.getElementById('json-display').innerHTML = syntaxHighlight(jsonData);
+        });
+    </script>
+</body>
+</html> 

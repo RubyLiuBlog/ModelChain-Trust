@@ -1,0 +1,33 @@
+# Qwen1.5-0.5B-Chat 模型评测配置
+
+# 全局配置
+output_dir: "./outputs"  # 结果输出目录
+debug: true             # 是否开启调试模式
+
+# 任务列表
+tasks:
+  # 使用Qwen模型评测Math数据集
+  - name: "qwen_math_test"
+    model:
+      name: "huggingface"      # 模型类型
+      model_name: "/home/bugsmith/.cache/huggingface/hub/models--Qwen--Qwen1.5-0.5B-Chat/snapshots/4d14e384a4b037942bb3f3016665157c8bcb70ea"  # 本地模型路径
+      load_in_8bit: false      # 不使用8bit量化
+      load_in_4bit: true       # 使用4bit量化
+      device: "cuda"           # 使用设备
+      trust_remote_code: true  # 允许执行模型代码
+      use_better_transformer: true  # 启用BetterTransformer优化
+    dataset:
+      name: "math"             # 数据集名称
+      max_samples: 3           # 最大样本数
+    metrics:
+      - "accuracy"             # 使用准确率指标
+    eval_config:
+      batch_size: 1
+      prompt_template: "<|im_start|>system\n你是一个数学专家，擅长解答数学问题。请一步步思考，最后使用'答案是：X'的格式给出最终答案。\n<|im_end|>\n<|im_start|>user\n请解答以下数学问题：\n\n{problem}\n<|im_end|>\n<|im_start|>assistant\n"
+      generation_kwargs:
+        temperature: 0.1
+        max_new_tokens: 512
+        do_sample: true
+        top_p: 0.8
+        repetition_penalty: 1.1
+        stop_strings: ["<|im_end|>", "<|im_start|>"]  # 遇到这些字符串时停止生成 

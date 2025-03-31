@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ theme.name }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ theme.title }}</title>
+    <meta name="theme-color" content="#9370DB">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="logo">{{ theme.title }}</div>
+        
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">创建评测任务</h2>
+                    </div>
+                    
+                    <form action="{{ url_for('evaluate') }}" method="post">
+                        <div class="form-group">
+                            <label for="model_path" class="form-label">模型</label>
+                            <select class="form-select" id="model_path" name="model_path" required>
+                                <option value="">-- 请选择模型 --</option>
+                                {% for model in models %}
+                                <option value="{{ model }}">{{ model }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">数据集</label>
+                            <div>
+                                {% for dataset in datasets %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="datasets" value="{{ dataset }}" id="dataset-{{ dataset }}">
+                                    <label class="form-check-label" for="dataset-{{ dataset }}">{{ dataset }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="max_samples" class="form-label">最大样本数</label>
+                            <input type="number" class="form-control" id="max_samples" name="max_samples" value="5" min="1" max="100">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="device" class="form-label">设备</label>
+                            <select class="form-select" id="device" name="device">
+                                <option value="auto">自动选择</option>
+                                <option value="cuda">CUDA (GPU)</option>
+                                <option value="cpu">CPU</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="debug" name="debug">
+                            <label class="form-check-label" for="debug">调试模式</label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">开始评测</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">评测任务列表</h2>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>任务ID</th>
+                                    <th>模型</th>
+                                    <th>数据集</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tasksList">
+                                {% for task_id, task in evaluation_tasks.items() %}
+                                <tr>
+                                    <td>{{ task_id[:8] }}...</td>
+                                    <td>{{ task.model_path.split('/')[-1] }}</td>
+                                    <td>{{ task.datasets|join(', ') }}</td>
+                                    <td>
+                                        {% if task.status == 'pending' %}
+                                        <span class="badge badge-warning">等待中</span>
+                                        {% elif task.status == 'running' %}
+                                        <span class="badge badge-primary">运行中</span>
+                                        {% elif task.status == 'completed' %}
+                                        <span class="badge badge-success">已完成</span>
+                                        {% elif task.status == 'failed' %}
+                                        <span class="badge badge-danger">失败</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('task_status', task_id=task_id) }}" class="btn btn-primary">查看</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html> 

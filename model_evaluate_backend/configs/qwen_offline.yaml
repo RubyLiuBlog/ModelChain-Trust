@@ -1,0 +1,32 @@
+# Qwen1.5-0.5B-Chat 离线评测配置
+
+# 全局配置
+output_dir: "./outputs"  
+debug: true             
+
+# 任务列表
+tasks:
+  # 使用Qwen模型评测Math数据集
+  - name: "qwen_math_offline"
+    model:
+      name: "huggingface"      # 模型类型
+      model_name: "/home/bugsmith/model_evaluate_demo/models/qwen_local"  # 本地模型路径
+      load_in_8bit: false      # 不使用8bit量化
+      load_in_4bit: false      # 关闭4bit量化以排查问题
+      device: "cuda"           # 使用设备 
+      trust_remote_code: true  # 允许执行模型代码
+      offline: true            # 启用离线模式
+      use_better_transformer: false  # 关闭优化以排查问题
+    dataset:
+      name: "math"             # 数据集名称
+      max_samples: 1           # 只测试1个样本
+    metrics:
+      - "accuracy"             # 使用准确率指标
+    eval_config:
+      batch_size: 1
+      prompt_template: "Solve this step-by-step:\nProblem: {question}\n\n"
+      generation_kwargs:
+        temperature: 0.0
+        max_new_tokens: 256 
+        do_sample: false       # 使用贪婪解码
+        repetition_penalty: 1.0 

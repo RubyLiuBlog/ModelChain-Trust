@@ -1,0 +1,27 @@
+# OpenAI English Evaluation Config
+
+# Global Config
+output_dir: "./outputs"  # Output directory
+debug: true             # Debug mode
+
+# Tasks
+tasks:
+  # Evaluate OpenAI model on Math dataset
+  - name: "openai_math_english"
+    model:
+      name: "openai"           # Model type
+      model_name: "gpt-3.5-turbo"  # OpenAI model name
+      # api_key will be taken from OPENAI_API_KEY environment variable
+      retry_count: 2           # API retry count
+    dataset:
+      name: "math"             # Dataset name
+      max_samples: 1           # Test only 1 sample
+    metrics:
+      - "accuracy"             # Use accuracy metric
+    eval_config:
+      batch_size: 1
+      prompt_template: "Solve the following math problem:\n\n{problem}\n\nThink step by step and provide the final answer in the format 'The answer is: X'."
+      generation_kwargs:
+        temperature: 0.1
+        max_tokens: 256
+        system_message: "You are a math expert. Think step by step and provide the final answer in the format 'The answer is: X'." 

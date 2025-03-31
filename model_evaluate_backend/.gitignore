@@ -1,0 +1,60 @@
+# Python忽略项
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 虚拟环境
+venv/
+ENV/
+env/
+
+# IDE相关
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# 评估框架特定忽略项
+outputs/
+logs/
+*.log
+.cache/
+*.cache
+
+# 模型和数据
+models/
+downloaded_models/
+.huggingface/
+*.bin
+*.pt
+*.safetensors
+*.h5
+*.onnx
+
+# 个人配置文件
+configs/local_*
+*_local.yaml
+
+# 临时文件
+tmp/
+temp/
+.tmp/
+*~ 

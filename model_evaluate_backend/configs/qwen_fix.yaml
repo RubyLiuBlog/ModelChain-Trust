@@ -1,0 +1,29 @@
+global:
+  output_dir: ./outputs
+  debug: true  # 启用调试输出
+
+tasks:
+  - name: qwen_math_fix
+    model:
+      name: huggingface  # 模型类型为huggingface
+      model_name: /home/bugsmith/qwen  # 使用本地模型路径
+      offline: true  # 启用离线模式
+      local_files_only: true  # 只使用本地文件
+      trust_remote_code: true  # 必须信任远程代码才能加载Qwen模型
+      device: cuda  # 使用CUDA设备
+      load_8bit: false  # 不使用8位量化
+      load_4bit: false  # 不使用4位量化
+    
+    dataset:
+      name: math  # 数据集名称
+      max_samples: 1  # 只评测1个样本（测试用）
+    
+    metrics:
+      - accuracy  # 使用准确率指标
+    
+    eval_config:
+      batch_size: 1  # 评测时的批大小
+      prompt_template: "Problem: {question}\nSolution:"  # 提示模板
+      temperature: 0.0  # 使用确定性生成
+      max_tokens: 256  # 最大生成token数
+      system_message: "You are a helpful AI assistant that solves math problems step-by-step." # 系统消息 

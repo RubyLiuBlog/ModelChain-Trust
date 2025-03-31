@@ -1,0 +1,27 @@
+# OpenAI简单评测配置
+
+# 全局配置
+output_dir: "./outputs"  # 结果输出目录
+debug: true             # 是否开启调试模式
+
+# 任务列表
+tasks:
+  # 使用OpenAI模型评测Math数据集
+  - name: "openai_math_simple"
+    model:
+      name: "openai"           # 模型类型
+      model_name: "gpt-3.5-turbo"  # OpenAI模型名称
+      # api_key 将从环境变量 OPENAI_API_KEY 获取
+      retry_count: 2           # API调用失败时的重试次数
+    dataset:
+      name: "math"             # 数据集名称
+      max_samples: 1           # 只测试1个样本
+    metrics:
+      - "accuracy"             # 使用准确率指标
+    eval_config:
+      batch_size: 1
+      prompt_template: "请解答以下数学问题：\n\n{problem}\n\n请一步步思考，并使用'答案是：X'的格式给出最终答案。"
+      generation_kwargs:
+        temperature: 0.1
+        max_tokens: 256
+        system_message: "你是一个数学专家，擅长解答数学问题。请一步步思考，最后使用'答案是：X'的格式给出最终答案。" 

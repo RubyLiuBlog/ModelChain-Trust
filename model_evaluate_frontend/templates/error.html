@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ theme.name }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>错误 - {{ theme.title }}</title>
+    <meta name="theme-color" content="#9370DB">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <a href="{{ url_for('index') }}">{{ theme.title }}</a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">错误</h2>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">返回首页</a>
+            </div>
+            
+            <div class="alert alert-danger">
+                {{ message }}
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

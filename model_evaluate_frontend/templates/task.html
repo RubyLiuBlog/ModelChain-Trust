@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="{{ theme.name }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务状态 - {{ theme.title }}</title>
+    <meta name="theme-color" content="#9370DB">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .error-details {
+            background-color: #252525;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            color: var(--text-color);
+        }
+        .collapsible {
+            background-color: #333;
+            color: var(--text-color);
+            cursor: pointer;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 15px;
+            margin-top: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+        .active, .collapsible:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .content {
+            padding: 0 10px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            background-color: #252525;
+            border-left: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 0 0 4px 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <a href="{{ url_for('index') }}">{{ theme.title }}</a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">评测任务详情</h2>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">返回首页</a>
+            </div>
+            
+            <div>
+                <h3>基本信息</h3>
+                <table class="table">
+                    <tr>
+                        <th>任务ID：</th>
+                        <td id="task-id">{{ task.id }}</td>
+                    </tr>
+                    <tr>
+                        <th>模型路径：</th>
+                        <td>{{ task.model_path }}</td>
+                    </tr>
+                    <tr>
+                        <th>数据集：</th>
+                        <td>{{ task.datasets|join(', ') }}</td>
+                    </tr>
+                    <tr>
+                        <th>最大样本数：</th>
+                        <td>{{ task.max_samples }}</td>
+                    </tr>
+                    <tr>
+                        <th>设备：</th>
+                        <td>{{ task.device or '自动选择' }}</td>
+                    </tr>
+                    <tr>
+                        <th>调试模式：</th>
+                        <td>{{ '是' if task.debug else '否' }}</td>
+                    </tr>
+                    <tr>
+                        <th>创建时间：</th>
+                        <td>{{ task.created_at }}</td>
+                    </tr>
+                    <tr>
+                        <th>状态：</th>
+                        <td>
+                            <span id="task-status" class="badge 
+                                {% if task.status == 'pending' %}badge-warning
+                                {% elif task.status == 'running' %}badge-primary
+                                {% elif task.status == 'completed' %}badge-success
+                                {% elif task.status == 'failed' %}badge-danger
+                                {% endif %}">
+                                {% if task.status == 'pending' %}等待中
+                                {% elif task.status == 'running' %}运行中
+                                {% elif task.status == 'completed' %}已完成
+                                {% elif task.status == 'failed' %}失败
+                                {% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>最后更新：</th>
+                        <td id="task-updated-at">{{ task.updated_at }}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            {% if task.status == 'running' %}
+            <div class="mt-2">
+                <h3>评测进度</h3>
+                <div class="progress">
+                    <div class="progress-bar" style="width: 100%">评测中...</div>
+                </div>
+                <p><em>正在进行评测，请稍候...</em></p>
+            </div>
+            {% endif %}
+            
+            <div id="result-container" style="display: {% if task.status == 'completed' and task.result and task.result.result_files %}block{% else %}none{% endif %};">
+                <h3>评测结果</h3>
+                <p>评测已完成，您可以查看以下结果文件：</p>
+                <ul id="result-files">
+                    {% if task.result and task.result.result_files %}
+                        {% for file in task.result.result_files %}
+                        <li><a href="{{ url_for('view_result', filename=file) }}" target="_blank">{{ file }}</a></li>
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+            </div>
+            
+            <div id="error-container" style="display: {% if task.status == 'failed' and task.result %}block{% else %}none{% endif %};">
+                <h3>评测失败</h3>
+                <div class="alert alert-danger">
+                    <strong>错误信息：</strong>
+                    <span id="error-message">
+                        {% if task.result and task.result.error %}
+                            {{ task.result.error }}
+                        {% else %}
+                            未知错误
+                        {% endif %}
+                    </span>
+                </div>
+                
+                {% if task.result and task.result.traceback %}
+                <button type="button" class="collapsible">显示详细错误信息</button>
+                <div class="content">
+                    <div class="error-details">{{ task.result.traceback }}</div>
+                </div>
+                {% endif %}
+                
+                {% if task.result and task.result.stderr %}
+                <button type="button" class="collapsible">显示标准错误输出</button>
+                <div class="content">
+                    <div class="error-details">{{ task.result.stderr }}</div>
+                </div>
+                {% endif %}
+                
+                {% if task.result and task.result.stdout %}
+                <button type="button" class="collapsible">显示标准输出</button>
+                <div class="content">
+                    <div class="error-details">{{ task.result.stdout }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // 可折叠面板功能
+        var coll = document.getElementsByClassName("collapsible");
+        for (var i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                }
+            });
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,57 @@
+# 全面评测配置 - 参考OpenCompass配置
+# 支持GSM8K和MATH数据集的全面评测
+
+global:
+  output_dir: "./outputs"
+  debug: false
+
+tasks:
+  - name: qwen_gsm8k
+    model:
+      type: huggingface
+      path: /home/bugsmith/qwen
+      quantization: 
+        load_in_8bit: false
+        load_in_4bit: false
+      trust_remote_code: true
+      device: auto
+      offline: true
+    dataset:
+      name: gsm8k
+      max_samples: 100  # 评测100个样本
+    metrics:
+      - accuracy
+    evaluation:
+      batch_size: 1
+      prompt_template: |
+        问题: {{problem}}
+        请一步步思考并给出答案。
+      generation:
+        temperature: 0.1
+        max_tokens: 512
+        num_beams: 1
+        
+  - name: qwen_math
+    model:
+      type: huggingface
+      path: /home/bugsmith/qwen
+      quantization: 
+        load_in_8bit: false
+        load_in_4bit: false
+      trust_remote_code: true
+      device: auto
+      offline: true
+    dataset:
+      name: math
+      max_samples: 50  # 评测50个样本
+    metrics:
+      - accuracy
+    evaluation:
+      batch_size: 1
+      prompt_template: |
+        问题: {{problem}}
+        请仔细分析并逐步解答数学问题。确保你的推导过程清晰，并在最后明确给出答案。
+      generation:
+        temperature: 0.1
+        max_tokens: 1024  # MATH问题通常需要更长的回答
+        num_beams: 1 
